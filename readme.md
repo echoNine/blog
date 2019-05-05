@@ -1,1 +1,1 @@
-# A Blog build on laravel framework 1
+# A Blog build on laravel framework
