@@ -14,7 +14,7 @@ class AddEmailToUserTable extends Migration
     public function up()
     {
         Schema::table('user', function (Blueprint $table) {
-            $table->varchar(255)('email');
+            $table->string('email', 255)->comment('邮箱');
         });
     }
 
