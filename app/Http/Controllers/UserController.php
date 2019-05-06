@@ -14,6 +14,7 @@ class UserController extends Controller
         //首先完成 让 /api/user/register 访问到这个接口
         $user_name = $request::get('user_name');
         $password = $request::get('password');
+        $email = $request::get('email');
 
         //判断用户名是否已存在name)->first();
         $first = UserModel::query()->where('user_name', $user_name)->first();
@@ -32,6 +33,7 @@ class UserController extends Controller
         $new_user = new UserModel();
         $new_user->user_name = $user_name;
         $new_user->password = $password;
+        $new_user->email = $email;
         $new_user->save();
         $response = [
             'success' => true,
@@ -42,7 +44,7 @@ class UserController extends Controller
 
     public function all()
     {
-        $all = UserModel::all(['id', 'user_name', 'created_at', 'updated_at']);
+        $all = UserModel::all(['id', 'user_name', 'email','created_at', 'updated_at']);
         return [
             'success' => true,
             'msg' => $all
