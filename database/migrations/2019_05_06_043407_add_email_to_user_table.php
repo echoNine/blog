@@ -25,6 +25,8 @@ class AddEmailToUserTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('AddEmailToUserTable');
+        Schema::table('user', function (Blueprint $table) {
+            $table->dropColumn('email');
+        });
     }
 }
