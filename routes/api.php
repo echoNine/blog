@@ -19,6 +19,9 @@ use Illuminate\Http\Request;
 
 Route::post('/user/register', 'UserController@register');
 Route::get('/user/all', 'UserController@all');
+Route::post('/user/login', 'UserController@login');
+
 Route::post('/article/create', 'ArticleController@create');
 Route::get('/article/all', 'ArticleController@all');
-
+Route::post('/article/edit', 'ArticleController@edit');
+Route::get('/article/list/user', 'ArticleController@display');

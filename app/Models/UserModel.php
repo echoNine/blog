@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\UserModel wherePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\UserModel whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\UserModel whereUserName($value)
+ * @property string $email 邮箱
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\UserModel whereEmail($value)
  */
 class UserModel extends Model
 {
