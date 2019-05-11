@@ -5,6 +5,7 @@ namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\ArticleModel
@@ -26,6 +27,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ArticleModel extends Model
 {
+    use SoftDeletes;
     //table_name 定义和数据表的映射
     protected $table = 'article';
+
+    protected $datas = ['deleted_at'];
 }

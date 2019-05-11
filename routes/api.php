@@ -25,3 +25,4 @@ Route::post('/article/create', 'ArticleController@create');
 Route::get('/article/all', 'ArticleController@all');
 Route::post('/article/edit', 'ArticleController@edit');
 Route::get('/article/list/user', 'ArticleController@display');
+Route::post('/article/delete', 'ArticleController@delete');

@@ -92,10 +92,26 @@ class ArticleController
         return $response;
     }
 
-//    public function delete(Request $request)
-//    {
-//        $user_id = $request::get('user_id');
-//        $article_id = $request::get('article_id');
-//
-//    }
+    /**
+     * @param Request $request
+     * @return array
+     * @throws Exception
+     */
+    public function delete(Request $request)
+    {
+        $user_id = $request::get('user_id');
+        $article_id = $request::get('article_id');
+
+        $del_Target = ArticleModel::where('user_id', $user_id)->where('id', $article_id)->firstOrFail();
+
+        if ($del_Target->forceDelete()) {
+            return [
+                "success" => true,
+                "msg" => "delete success"
+            ];
+        } else {
+            throw new Exception('the record does not exist');
+        }
+    }
+
 }
