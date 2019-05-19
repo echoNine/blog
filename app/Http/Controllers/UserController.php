@@ -3,8 +3,8 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\UserModel;
+use App\Services\MailService;
 use Exception;
 use Illuminate\Support\Facades\Redis;
 use Request;
@@ -42,7 +42,7 @@ class UserController extends Controller
             throw new Exception("email format error");
         }
 
-        //判断邮箱是否重复
+        //判断邮箱是否重复(
         $first = UserModel::query()
             ->where('email',$email)
             ->first();
@@ -50,20 +50,22 @@ class UserController extends Controller
             throw new Exception("The email is repeated");
         }
 
-        //数据库存储
-
-        $new_user = new UserModel();
-        $new_user->user_name = $user_name;
-        //$new_user->password = $password;
-        //密码加密并存储到数据库
-        $new_user->password = password_hash($password, PASSWORD_BCRYPT);
-        $new_user->email = $email;
-        $new_user->save();
-        $response = [
-            'success' => true,
-            'msg' => true
-        ];
-        return $response;
+        $token = "";
+        $str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        $len = strlen($str);
+        for ($i = 0; $i < 6; $i++) {
+            $token .= $str[random_int(0, $len - 1)];
+        }
+        $content = "Hi @".$user_name."  Help us secure your GitHub account by verifying your email address (".$email.").  This lets you access all of GitHub’s features.Verify email address Button not working? Paste the following link into your browser:".$token."  You’re receiving this email because you recently created a new GitHub account or added a new email address. If this wasn’t you, please ignore this email";
+        MailService::send("注册成功", $content, $email);
+        //将用户名 邮箱 加密后密码 存redis
+        $store = Redis::set($token, json_encode(([$user_name, $email, password_hash($password, PASSWORD_BCRYPT)])));
+        if($store){
+            return [
+                'success' => true,
+                'msg' => true
+            ];
+        }
     }
 
     public function all()
@@ -75,6 +77,10 @@ class UserController extends Controller
         ];
     }
 
+    /**
+     * @param Request $request
+     * @return array
+     */
     public function login(Request $request)
     {
         //首先完成 让 /api/user/login 访问到这个接口
@@ -89,7 +95,7 @@ class UserController extends Controller
         if ($user && password_verify($password, $user->password)) {
             $key = function (){
                 $key = "";
-                $str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                $str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
                 $len = strlen($str);//$str长度
                 for ($i = 0; $i < 32; $i++) {
                     $key .= $str[random_int(0, $len - 1)];
@@ -108,5 +114,34 @@ class UserController extends Controller
             ];
         }
         return $response;
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     * @throws Exception
+     */
+    public function verify(Request $request)
+    {
+        $token = $request::get('token');
+        $user_string = Redis::get($token);
+        if ($user_string){
+            //todo 验证成功 新建用户 并且移除 redis $token 信息
+            $user_array = json_decode($user_string);
+            $new_user = new UserModel();
+            $new_user->user_name = $user_array[0];
+            $new_user->password = $user_array[2];
+            $new_user->email = $user_array[1];
+            $new_user->actived = true;
+            $new_user->save();
+            Redis::del($token);
+            return [
+                'success' => true,
+                'msg' => $new_user
+            ];
+        } else {
+            throw new Exception("verify failed");
+        }
+
     }
 }

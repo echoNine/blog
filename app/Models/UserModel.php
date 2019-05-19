@@ -25,6 +25,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\UserModel whereUserName($value)
  * @property string $email 邮箱
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\UserModel whereEmail($value)
+ * @property int $actived 是否激活
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\UserModel whereActived($value)
  */
 class UserModel extends Model
 {
