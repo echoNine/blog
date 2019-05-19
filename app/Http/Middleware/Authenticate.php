@@ -2,20 +2,22 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use App\Exceptions\NotLoginException;
+use Closure;
 
-class Authenticate extends Middleware
-{
+class Authenticate {
     /**
-     * Get the path the user should be redirected to when they are not authenticated.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return string
+     * @param \Illuminate\Http\Request $request
+     * @param Closure $next
+     * @return mixed
+     * @throws NotLoginException
      */
-    protected function redirectTo($request)
-    {
-        if (! $request->expectsJson()) {
-            return route('login');
+    public function handle ($request, Closure $next) {
+        $response = $next($request);
+        if (!$request->session()->get('user_id')) {
+            throw new NotLoginException();
         }
+
+        return $response;
     }
 }

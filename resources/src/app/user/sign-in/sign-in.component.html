@@ -1,0 +1,27 @@
+<div class="sign">
+  <div class="logo">
+
+  </div>
+  <div class="sign_box">
+    <div class="box_header">
+      <a href="./sign_in" class="active">登录</a>
+      <b>·</b>
+      <a href="./sign_up">注册</a>
+    </div>
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+      <label>
+        <input id="userName"
+               class="fa fa-user-o username"
+               name="userName"
+               type="text"
+               placeholder="用户名"
+               formControlName="userName"
+               [(ngModel)]="model.userName"
+               required/>
+      </label>
+      <label><input class="email" type="password" placeholder="密码" formControlName="password" [(ngModel)]="model.password"/></label>
+      <button type="submit" [disabled]="!profileForm.valid" class="submit">登录</button>
+    </form>
+  </div>
+
+</div>
