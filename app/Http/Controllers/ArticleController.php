@@ -4,6 +4,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ArticleModel;
+use App\Models\CategoryModel;
 use Exception;
 use Request;
 
@@ -13,24 +14,38 @@ class ArticleController
     /**
      * @param Request $request
      * @return array
+     * @throws Exception
      */
     public function create(Request $request)
     {
         //首先完成 让 /api/article/create 访问到这个接口
         $user_id = $request::get('user_id');
+        $title = $request::get('title');
         $content = $request::get('content');
+        $category_id = $request::get('category_id');
 
-        //数据库存储
+        $first = CategoryModel::query()
+            ->where('user_id',$user_id)
+            ->where('id',$category_id)
+            ->first();
 
-        $new_article = new ArticleModel();
-        $new_article->user_id = $user_id;
-        $new_article->content = $content;
-        $new_article->save();
-        $response = [
-            'success' => true,
-            'msg' => true
-        ];
-        return $response;
+        if ($first){
+            //数据库存储
+            $new_article = new ArticleModel();
+            $new_article->user_id = $user_id;
+            $new_article->title = $title;
+            $new_article->content = $content;
+            $new_article->category_id = $category_id;
+            $new_article->save();
+            return [
+                'success' => true,
+                'msg' => true
+            ];
+
+        } else {
+            throw new Exception('the user doesn\'t have this type');
+        }
+
     }
 
     public function all()
@@ -59,14 +74,13 @@ class ArticleController
         if ($first) {
             $first->content = $content;
             $first->save();
-            $response = [
+            return [
                 'success' => true,
                 'msg' => true
             ];
         } else {
             throw new Exception('can\'t find the article');
         }
-        return $response;
     }
 
     /**
@@ -80,16 +94,17 @@ class ArticleController
         //$page = $request::get('page');
         $list = ArticleModel::query()
             ->where('user_id', $user_id)
-            ->paginate(2, ['id', 'content']);
+            ->paginate(2, ['id', 'category_id', 'title', 'content']);
             //->paginate(2, ['id', 'content'], 'page', $page);
-        $response = [
-            "success" => true,
-            "msg" => [
-                "total" => $list->total(),
-                "items" => $list->items()
-            ]
-        ];
-        return $response;
+        if ($list){
+            return [
+                "success" => true,
+                "msg" => [
+                    "total" => $list->total(),
+                    "items" => $list->items()
+                ]
+            ];
+        }
     }
 
     /**
@@ -97,20 +112,79 @@ class ArticleController
      * @return array
      * @throws Exception
      */
-    public function delete(Request $request)
+    public function softDelete(Request $request)
     {
         $user_id = $request::get('user_id');
         $article_id = $request::get('article_id');
 
-        $del_Target = ArticleModel::where('user_id', $user_id)->where('id', $article_id)->firstOrFail();
+        $del_Target = ArticleModel::query()->where('user_id', $user_id)->where('id', $article_id)->firstOrFail();
 
-        if ($del_Target->forceDelete()) {
+        if ($del_Target->delete()) {
             return [
                 "success" => true,
                 "msg" => "delete success"
             ];
         } else {
             throw new Exception('the record does not exist');
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     * @throws Exception
+     */
+    public function getTrashed(Request $request)
+    {
+        $user_id = $request::get('user_id');
+        $trashed_list = ArticleModel::onlyTrashed()->where('user_id',$user_id)->get();
+        if ($trashed_list){
+            return [
+                'success' => true,
+                'msg' => $trashed_list
+            ];
+        } else {
+            throw new Exception('can\'t find the record');
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     * @throws Exception
+     */
+    public function restore(Request $request)
+    {
+        $user_id = $request::get('user_id');
+        $article_id = $request::get('article_id');
+        $recover = ArticleModel::onlyTrashed()->where('user_id', $user_id)->where('id', $article_id)->firstOrFail()->restore();
+        if ($recover) {
+            return [
+                'success' => true,
+                'msg' => "recover success"
+            ];
+        } else {
+            throw new Exception('recover failed');
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     * @throws Exception
+     */
+    public function forceDelete(Request $request)
+    {
+        $user_id = $request::get('user_id');
+        $article_id = $request::get('article_id');
+        $trashed = ArticleModel::onlyTrashed()->where('user_id', $user_id)->where('id', $article_id)->firstOrFail()->forceDelete();
+        if ($trashed) {
+            return [
+                'success' => true,
+                'msg' => "completely delete success"
+            ];
+        } else {
+            throw new Exception('completely delete failed');
         }
     }
 

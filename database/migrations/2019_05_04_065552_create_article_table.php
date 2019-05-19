@@ -13,7 +13,9 @@ class CreateArticleTable extends Migration
      */
     public function up()
     {
-        Schema::create('article', function (Blueprint $table) {
+        Schema::create(/**
+         * @param Blueprint $table
+         */ 'article', function (Blueprint $table) {
             $table->increments('id');//文章表的唯一标识
 
             $table->unsignedInteger('user_id');
